@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-bt-sync — Sync Bluetooth pairing keys from Windows to Linux.
+blueWin — Sync Bluetooth pairing keys from Windows to Linux.
 
 Supports any Linux distro using BlueZ (/var/lib/bluetooth).
 Tested: Arch, Ubuntu, Fedora, Debian, Mint.
 
 Usage:
-    sudo python3 bt-sync.py
+    sudo python3 bt_sync.py   # direct
+    sudo bluewin              # after: pip install . or pipx install .
 
 Workflow:
     1. Pair the device on Linux once (first time only — creates the record).
@@ -54,7 +55,7 @@ def die(msg, *hints):
 def ensure_registry():
     """Make python-registry importable, auto-installing into a venv if needed."""
     try:
-        from Registry import Registry  # noqa: F401
+        from Registry import Registry  # noqa: F401  # type: ignore[import]
         info("python-registry ready")
         return
     except ImportError:
@@ -213,7 +214,7 @@ def get_windows_keys(hive_path):
     Return {adapter_mac_no_colons: {device_mac_no_colons: key_hex_upper}}.
     Reads the active ControlSet first, falls back to 001/002/003.
     """
-    from Registry import Registry
+    from Registry import Registry  # type: ignore[import]
 
     reg = Registry.Registry(hive_path)
 

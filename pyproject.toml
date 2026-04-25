@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bluewin"
+version = "1.0.0"
+description = "Sync Bluetooth pairing keys from Windows to Linux on dual-boot machines"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Mykal-Steele" }]
+requires-python = ">=3.9"
+dependencies = ["python-registry"]
+keywords = ["bluetooth", "dual-boot", "linux", "windows", "bluez", "pairing"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Hardware",
+    "Topic :: Utilities",
+]
+
+[project.scripts]
+bluewin = "bt_sync:main"
+
+[project.optional-dependencies]
+dev = ["ruff>=0.6"]
+
+[project.urls]
+Repository = "https://github.com/Mykal-Steele/blueWin"
+"Bug Tracker" = "https://github.com/Mykal-Steele/blueWin/issues"
+
+[tool.setuptools]
+py-modules = ["bt_sync"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
