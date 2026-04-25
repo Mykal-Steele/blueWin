@@ -354,10 +354,12 @@ def main():
     header()
 
     if os.geteuid() != 0:
-        die(
-            "Must run as root.",
-            f"Run:  sudo python3 {sys.argv[0]}",
-        )
+        cmd = sys.argv[0]
+        if cmd.endswith(".py"):
+            hint = f"Run:  sudo python3 {cmd}"
+        else:
+            hint = 'Run:  sudo env "PATH=$PATH" bluewin'
+        die("Must run as root.", hint)
 
     # ── 1/4 Dependencies
     step(1, 4, "Checking dependencies")

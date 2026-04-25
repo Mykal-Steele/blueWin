@@ -39,8 +39,24 @@ Registry parsing uses [python-registry](https://github.com/williballenthin/pytho
 
 ### pipx (cleanest option for CLI tools)
 
+Install pipx if you don't have it:
+
+```bash
+# Arch
+sudo pacman -S python-pipx
+
+# Ubuntu/Debian
+sudo apt install pipx
+
+# Fedora
+sudo dnf install pipx
+```
+
+Then install blueWin:
+
 ```bash
 pipx install git+https://github.com/Mykal-Steele/blueWin.git
+pipx ensurepath   # adds ~/.local/bin to PATH if needed (restart terminal after)
 sudo bluewin
 ```
 
@@ -64,9 +80,11 @@ sudo python3 bt_sync.py
 ## Usage
 
 ```bash
-sudo bluewin              # if installed via pip/pipx
-sudo python3 bt_sync.py  # if running directly
+sudo env "PATH=$PATH" bluewin  # if installed via pipx
+sudo python3 bt_sync.py        # if running directly
 ```
+
+> **Why `env "PATH=$PATH"`?** `sudo` uses a restricted PATH that doesn't include `~/.local/bin` where pipx installs things. Passing the current PATH through `env` makes `bluewin` visible to sudo.
 
 The script finds your Windows partition on its own (auto-mounts it if needed), reads the keys, and syncs them. Takes a few seconds.
 
