@@ -37,37 +37,7 @@ Registry parsing uses [python-registry](https://github.com/williballenthin/pytho
 
 ## Installation
 
-### pipx (cleanest option for CLI tools)
-
-Install pipx if you don't have it:
-
-```bash
-# Arch
-sudo pacman -S python-pipx
-
-# Ubuntu/Debian
-sudo apt install pipx
-
-# Fedora
-sudo dnf install pipx
-```
-
-Then install blueWin:
-
-```bash
-pipx install git+https://github.com/Mykal-Steele/blueWin.git
-pipx ensurepath   # adds ~/.local/bin to PATH if needed (restart terminal after)
-sudo bluewin
-```
-
-### pip
-
-```bash
-pip install git+https://github.com/Mykal-Steele/blueWin.git
-sudo bluewin
-```
-
-### Just clone and run
+### Clone and run (simplest)
 
 ```bash
 git clone https://github.com/Mykal-Steele/blueWin.git
@@ -75,28 +45,39 @@ cd blueWin
 sudo python3 bt_sync.py
 ```
 
+### pipx
+
+Install pipx if you don't have it:
+
+```bash
+sudo pacman -S python-pipx   # Arch
+sudo apt install pipx        # Ubuntu/Debian
+sudo dnf install pipx        # Fedora
+```
+
+Then:
+
+```bash
+pipx install git+https://github.com/Mykal-Steele/blueWin.git
+sudo env "PATH=$PATH" bluewin
+```
+
 ---
 
 ## Usage
 
 ```bash
-sudo env "PATH=$PATH" bluewin  # if installed via pipx
-sudo python3 bt_sync.py        # if running directly
+sudo python3 bt_sync.py           # clone and run
+sudo env "PATH=$PATH" bluewin     # pipx install
 ```
 
-> **Why `env "PATH=$PATH"`?** `sudo` uses a restricted PATH that doesn't include `~/.local/bin` where pipx installs things. Passing the current PATH through `env` makes `bluewin` visible to sudo.
+### First time with a new device
 
-The script finds your Windows partition on its own (auto-mounts it if needed), reads the keys, and syncs them. Takes a few seconds.
-
-### First time setup with a new device
-
-You only need to do this once per device:
-
-1. **Pair on Linux first** so BlueZ creates a pairing record for the device
+1. **Pair on Linux first** so BlueZ has a record for the device
 2. **Pair on Windows** (Settings -> Bluetooth -> Add device)
 3. **Run blueWin** from Linux
 
-After that, just re-run blueWin whenever you pair on Windows again.
+After that, just re-run blueWin any time you pair on Windows again.
 
 ### If auto-detection fails
 
@@ -104,7 +85,7 @@ Mount your Windows partition manually and re-run:
 
 ```bash
 sudo mount -o ro /dev/sdXY /mnt/windows
-sudo bluewin
+sudo python3 bt_sync.py
 ```
 
 ---
@@ -146,7 +127,7 @@ blueWin -- Bluetooth dual-boot key sync
 | Root (`sudo`) | Needed to read BlueZ records and mount partitions |
 | Windows partition accessible | Script will auto-mount NTFS volumes if needed |
 
-**Disable Windows Fast Startup** or the registry on disk will be stale and the keys won't match:
+**Disable Windows Fast Startup** or the registry on disk will be stale:
 
 > Control Panel -> Power Options -> "Choose what the power buttons do" -> uncheck **Turn on fast startup**
 
@@ -170,13 +151,13 @@ blueWin -- Bluetooth dual-boot key sync
 Pair the device on Linux first (Bluetooth settings -> Add device), then re-run.
 
 **"Windows partition not found"**  
-Open your Windows partition in the file manager to trigger auto-mount, or mount it manually. See [above](#if-auto-detection-fails).
+Open your Windows partition in the file manager to trigger auto-mount, or mount it manually (see above).
 
 **"No Bluetooth keys found in Windows registry"**  
-You connected to the device in Windows but didn't actually pair. Go to Windows Bluetooth settings, remove the device, and add it again.
+You connected but didn't fully pair. In Windows Bluetooth settings, remove the device and add it again.
 
 **Device still won't connect after sync**  
-Fast Startup is probably still on. Disable it in Windows, shut down properly, then boot into Linux and re-run.
+Fast Startup is probably still on. Disable it in Windows, shut down properly, then re-run.
 
 ---
 
@@ -194,7 +175,7 @@ make format   # auto-format
 
 ## Contributing
 
-Issues and PRs are welcome. If it's a bigger change, open an issue first so we're on the same page.
+Issues and PRs are welcome. For bigger changes, open an issue first.
 
 ---
 
