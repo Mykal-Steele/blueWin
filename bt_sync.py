@@ -26,22 +26,26 @@ import re
 import subprocess
 import sys
 
-VENV_DIR      = "/tmp/bt_sync_venv"
+VENV_DIR = "/tmp/bt_sync_venv"
 HIVE_RELATIVE = "Windows/System32/config/SYSTEM"
-AUTO_MOUNT    = "/tmp/bt_sync_windows"
+AUTO_MOUNT = "/tmp/bt_sync_windows"
 
 
 # ── Output ────────────────────────────────────────────────────────────────────
+
 
 def header():
     print("bt-sync — Bluetooth dual-boot key sync")
     print("─" * 40)
 
+
 def step(n, total, label):
     print(f"\n[{n}/{total}] {label}")
 
+
 def info(msg):
     print(f"      {msg}")
+
 
 def die(msg, *hints):
     print(f"\n  ERROR  {msg}")
@@ -52,10 +56,12 @@ def die(msg, *hints):
 
 # ── Step 1: Dependencies ──────────────────────────────────────────────────────
 
+
 def ensure_registry():
     """Make python-registry importable, auto-installing into a venv if needed."""
     try:
         from Registry import Registry  # noqa: F401  # type: ignore[import]
+
         info("python-registry ready")
         return
     except ImportError:
@@ -67,6 +73,7 @@ def ensure_registry():
         info("Installing python-registry (one-time, ~5 s)...")
         try:
             import venv as _venv
+
             _venv.create(VENV_DIR, with_pip=True)
         except Exception as exc:
             die(
@@ -90,11 +97,11 @@ def ensure_registry():
 # ── Step 2: Find Windows partition ───────────────────────────────────────────
 
 MOUNT_GLOBS = [
-    f"/run/media/*/*/{HIVE_RELATIVE}",   # Arch, Fedora, openSUSE
-    f"/media/*/*/{HIVE_RELATIVE}",       # Ubuntu, Mint, Debian
-    f"/media/*/{HIVE_RELATIVE}",         # Ubuntu (older layout)
-    f"/mnt/*/{HIVE_RELATIVE}",           # manual mounts
-    f"/mnt/{HIVE_RELATIVE}",             # /mnt directly
+    f"/run/media/*/*/{HIVE_RELATIVE}",  # Arch, Fedora, openSUSE
+    f"/media/*/*/{HIVE_RELATIVE}",  # Ubuntu, Mint, Debian
+    f"/media/*/{HIVE_RELATIVE}",  # Ubuntu (older layout)
+    f"/mnt/*/{HIVE_RELATIVE}",  # manual mounts
+    f"/mnt/{HIVE_RELATIVE}",  # /mnt directly
 ]
 
 
@@ -107,7 +114,8 @@ def _already_mounted_hive():
     try:
         r = subprocess.run(
             ["findmnt", "-t", "ntfs,ntfs-3g,ntfs3,fuseblk", "-o", "TARGET", "-n"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         for target in r.stdout.strip().splitlines():
             candidate = os.path.join(target.strip(), HIVE_RELATIVE)
@@ -124,7 +132,8 @@ def _ntfs_devices():
     try:
         r = subprocess.run(
             ["lsblk", "-o", "PATH,FSTYPE", "-n"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         devices = []
         for line in r.stdout.splitlines():
@@ -140,7 +149,8 @@ def _ntfs_devices():
     try:
         r = subprocess.run(
             ["blkid", "-t", "TYPE=ntfs", "-o", "device"],
-            capture_output=True, text=True,
+            capture_output=True,
+            text=True,
         )
         return [d.strip() for d in r.stdout.splitlines() if d.strip()]
     except FileNotFoundError:
@@ -199,6 +209,7 @@ def find_system_hive():
 
 
 # ── Step 3: Read Windows Bluetooth keys ──────────────────────────────────────
+
 
 def _active_controlset(reg):
     """Read Select\\Current to find which ControlSet Windows was last booted from."""
@@ -264,6 +275,7 @@ def get_windows_keys(hive_path):
 
 # ── Step 4: Sync keys to Linux ───────────────────────────────────────────────
 
+
 def get_linux_devices():
     """
     Return {adapter_mac_no_colons: {device_mac_no_colons: info_path}}.
@@ -313,10 +325,11 @@ def read_device_name(info_path):
 
 
 def fmt_mac(mac_no_colons):
-    return ":".join(mac_no_colons[i:i+2] for i in range(0, 12, 2)).upper()
+    return ":".join(mac_no_colons[i : i + 2] for i in range(0, 12, 2)).upper()
 
 
 # ── Bluetooth service restart ────────────────────────────────────────────────
+
 
 def restart_bluetooth():
     if _cmd_exists("systemctl"):
@@ -335,6 +348,7 @@ def _cmd_exists(name):
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
+
 
 def main():
     header()
@@ -374,9 +388,9 @@ def main():
     step(4, 4, "Syncing keys to Linux")
     linux_devices = get_linux_devices()
 
-    updated   = 0
-    current   = 0
-    skipped   = []
+    updated = 0
+    current = 0
+    skipped = []
 
     for adapter_mac, win_devices in win_keys.items():
         linux_adapter = linux_devices.get(adapter_mac)
@@ -391,7 +405,7 @@ def main():
                 continue
 
             info_path = linux_adapter[device_mac]
-            name      = read_device_name(info_path)
+            name = read_device_name(info_path)
             _, status = sync_key(info_path, new_key)
 
             if status == "updated":
@@ -405,7 +419,7 @@ def main():
 
     for mac_label in skipped:
         print(f"  {mac_label}  →  not paired on Linux yet")
-        print(f"             Pair this device on Linux first, then re-run.")
+        print("             Pair this device on Linux first, then re-run.")
 
     # ── Summary
     print()
